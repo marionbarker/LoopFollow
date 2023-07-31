@@ -12,8 +12,8 @@ unique_id = ${DEVELOPMENT_TEAM}
 
 // To build multiple instances of LoopFollow, remove the // on
 // the next two lines and replace "Bob" with the desired app name for this instance:
-//display_name = Bob
-//app_suffix = .$(display_name)
+display_name = Hal_2001
+app_suffix = .$(display_name)
 
 
 
