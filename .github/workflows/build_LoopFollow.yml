@@ -22,7 +22,7 @@ jobs:
 
   # use a single runner for these sequential steps
   check_repo:
-    needs: check_certs
+#    needs: check_certs
     runs-on: ubuntu-latest
     name: Check Repository
     permissions:
