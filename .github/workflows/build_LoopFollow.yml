@@ -15,10 +15,10 @@ env:
 jobs:
   # Checks if Distribution certificate is present and valid, optionally nukes and
   # creates new certs if the repository variable ENABLE_NUKE_CERTS == 'true'
-  check_certs: 
-      name: Check certificates
-      uses: ./.github/workflows/create_certs.yml
-      secrets: inherit
+#  check_certs: 
+#      name: Check certificates
+#      uses: ./.github/workflows/create_certs.yml
+#      secrets: inherit
 
   # use a single runner for these sequential steps
   check_repo:
@@ -68,6 +68,18 @@ jobs:
             echo "ABORT_SYNC=false" >> $GITHUB_OUTPUT
           fi
 
+      # Add print statements
+      - name: Print things
+        run:
+          echo "TARGET_BRANCH is ${{ env.TARGET_BRANCH }}"
+          echo "UPSTREAM_REPO is ${{ env.UPSTREAM_REPO }}"
+          echo "UPSTREAM_BRANCH is ${{ env.UPSTREAM_BRANCH }}"
+          if ${{ vars.SCHEDULED_SYNC }}==true:
+            echo "SCHEDULED_SYNC is true"
+          else
+            echo "SCHEDULED_SYNC is false"
+          fi
+
       - name: Checkout target repo
         if: |
           needs.check_repo.outputs.WORKFLOW_PERMISSION == 'true' &&
@@ -88,12 +100,6 @@ jobs:
           target_repo_token: ${{ secrets.GH_PAT }}
           upstream_sync_branch: ${{ env.UPSTREAM_BRANCH }}
           upstream_sync_repo: ${{ env.UPSTREAM_REPO }}
-
-      # Add print statements
-      - name: Print things
-        run:
-          echo "SCHEDULED_SYNC is ${{ vars.SCHEDULED_SYNC }}"
-          echo "TARGET_BRANCH is ${{ env.TARGET_BRANCH }}"
 
       # Display a sample message based on the sync output var 'has_new_commits'
       - name: New commits found
