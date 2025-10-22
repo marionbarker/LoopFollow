@@ -121,7 +121,6 @@ jobs:
       # no point in doing this step unless we plan to build
       - name: Check certificates
         uses: ./.github/workflows/create_certs.yml
-        secrets: inherit
 
       - name: Select Xcode version
         run: "sudo xcode-select --switch /Applications/Xcode_16.4.app/Contents/Developer"
