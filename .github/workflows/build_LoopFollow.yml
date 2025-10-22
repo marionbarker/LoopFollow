@@ -90,8 +90,8 @@ jobs:
             echo "Running on dev branch"
             echo "ABORT_SYNC=false" >> $GITHUB_OUTPUT
           else
-            echo "Not running on main or dev branch"
-            echo "ABORT_SYNC=true" >> $GITHUB_OUTPUT
+            echo "Not running on main or dev branch, but allow other branches to be kept in sync"
+            echo "ABORT_SYNC=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Checkout target repo
