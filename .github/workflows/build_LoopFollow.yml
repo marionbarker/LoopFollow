@@ -76,10 +76,6 @@ jobs:
         with:
           token: ${{ secrets.GH_PAT }}
 
-        run: |
-            echo "vars.SCHEDULED_SYNC is ${{ vars.SCHEDULED_SYNC }}"
-            echo "env.TARGET_BRANCH is ${{ env.TARGET_BRANCH }}"
-
       - name: Sync upstream changes
         if: | # do not run the upstream sync action on the upstream repository
           needs.check_repo.outputs.WORKFLOW_PERMISSION == 'true' &&
@@ -92,6 +88,12 @@ jobs:
           target_repo_token: ${{ secrets.GH_PAT }}
           upstream_sync_branch: ${{ env.UPSTREAM_BRANCH }}
           upstream_sync_repo: ${{ env.UPSTREAM_REPO }}
+
+      # Add print statements
+      - name: Print things
+        run:
+          echo "SCHEDULED_SYNC is ${{ vars.SCHEDULED_SYNC }}"
+          echo "TARGET_BRANCH is ${{ env.TARGET_BRANCH }}"
 
       # Display a sample message based on the sync output var 'has_new_commits'
       - name: New commits found
