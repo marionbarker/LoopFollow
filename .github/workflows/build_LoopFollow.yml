@@ -8,7 +8,7 @@ on:
     - cron: "17 10 * * 0" # Sunday at UTC 10:17
 
 env:  
-  UPSTREAM_REPO: loopandlearn/LoopFollow
+  UPSTREAM_REPO: marionbarker/LoopFollow
   UPSTREAM_BRANCH: ${{ github.ref_name }} # branch on upstream repository to sync from (replace with specific branch name if needed)
   TARGET_BRANCH: ${{ github.ref_name }} # target branch on fork to be kept in sync
 
