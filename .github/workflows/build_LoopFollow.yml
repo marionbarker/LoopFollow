@@ -74,7 +74,7 @@ jobs:
           echo "TARGET_BRANCH is ${{ env.TARGET_BRANCH }}"
           echo "UPSTREAM_REPO is ${{ env.UPSTREAM_REPO }}"
           echo "UPSTREAM_BRANCH is ${{ env.UPSTREAM_BRANCH }}"
-          if ${{ vars.SCHEDULED_SYNC }}==true:
+          if vars.SCHEDULED_BUILD != 'false':
             echo "SCHEDULED_SYNC is true"
           else
             echo "SCHEDULED_SYNC is false"
