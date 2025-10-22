@@ -53,7 +53,7 @@ jobs:
       # Checks for changes in upstream repository; if changes exist prompts sync for build
       - name: Check if running on main or dev branch
         if: |
-          has_permission == 'true' &&
+          steps.workflow-permission.outputs.has_permission == 'true' &&
           (vars.SCHEDULED_BUILD != 'false' || vars.SCHEDULED_SYNC != 'false')
         id: check_branch
         run: |
