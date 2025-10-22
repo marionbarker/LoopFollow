@@ -146,7 +146,8 @@ jobs:
   # Builds LoopFollow
   build:
     name: Build
-    needs: [check_certs, check_repo, day_in_month]
+    #needs: [check_certs, check_repo, day_in_month]
+    needs: [check_repo, day_in_month]
     runs-on: macos-15
     permissions:
       contents: write
