@@ -21,7 +21,7 @@ jobs:
 #      secrets: inherit
 
   # use a single runner for these sequential steps
-  check_repo:
+  check_status:
 #    needs: check_certs
     runs-on: ubuntu-latest
     name: Check Repository
@@ -30,7 +30,7 @@ jobs:
     outputs:
       WORKFLOW_PERMISSION: ${{ steps.workflow-permission.outputs.has_permission }}
       NEW_COMMITS: ${{ steps.sync.outputs.has_new_commits }}
-      ABORT_SYNC: ${{ steps.check_branch.outputs.ABORT_SYNC }}
+      IS_SECOND_IN_MONTH: ${{ steps.date-check.outputs.is_second_instance }}
 
     # Checks if GH_PAT holds workflow permissions
     steps:
@@ -50,31 +50,6 @@ jobs:
             echo "has_permission=false" >> $GITHUB_OUTPUT # Set WORKFLOW_PERMISSION to false.
           fi
 
-      # Checks for changes in upstream repository; if changes exist prompts sync for build
-      - name: Check if running on main or dev branch
-        if: |
-          steps.workflow-permission.outputs.has_permission == 'true' &&
-          (vars.SCHEDULED_BUILD != 'false' || vars.SCHEDULED_SYNC != 'false')
-        id: check_branch
-        run: |
-          if [ "${GITHUB_REF##*/}" = "main" ]; then
-            echo "Running on main branch"
-            echo "ABORT_SYNC=false" >> $GITHUB_OUTPUT
-          elif [ "${GITHUB_REF##*/}" = "dev" ]; then
-            echo "Running on dev branch"
-            echo "ABORT_SYNC=false" >> $GITHUB_OUTPUT
-          else
-            echo "Not running on main or dev branch, but allow other branches to be kept in sync"
-            echo "ABORT_SYNC=false" >> $GITHUB_OUTPUT
-          fi
-
-      # Add print statements
-      - name: Print things
-        run:
-          echo "TARGET_BRANCH is ${{ env.TARGET_BRANCH }}"
-          echo "UPSTREAM_REPO is ${{ env.UPSTREAM_REPO }}"
-          echo "UPSTREAM_BRANCH is ${{ env.UPSTREAM_BRANCH }}"
-
       - name: Checkout target repo
         if: |
           steps.workflow-permission.outputs.has_permission == 'true' &&
@@ -86,7 +61,7 @@ jobs:
       - name: Sync upstream changes
         if: | # do not run the upstream sync action on the upstream repository
           steps.workflow-permission.outputs.has_permission == 'true' &&
-          vars.SCHEDULED_SYNC != 'false' && github.repository_owner != 'loopandlearn' && steps.check_branch.outputs.ABORT_SYNC == 'false'
+          vars.SCHEDULED_SYNC != 'false' && github.repository_owner != 'loopandlearn'
         id: sync
         uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
         with:
@@ -110,7 +85,7 @@ jobs:
         run: echo "There were no new commits."
 
       - name: Show value of 'has_new_commits'
-        if: steps.workflow-permission.outputs.has_permission == 'true' && vars.SCHEDULED_SYNC != 'false' && steps.check_branch.outputs.ABORT_SYNC == 'false'
+        if: steps.workflow-permission.outputs.has_permission == 'true' && vars.SCHEDULED_SYNC != 'false'
         run: |
           echo ${{ steps.sync.outputs.has_new_commits }}
           echo "NEW_COMMITS=${{ steps.sync.outputs.has_new_commits }}" >> $GITHUB_OUTPUT
@@ -123,17 +98,10 @@ jobs:
           echo "Synchronizing your fork of <code>LoopFollow</code> with the upstream repository <code>loopandlearn/LoopFollow</code> will be skipped." >> $GITHUB_STEP_SUMMARY
           echo "If you want to enable automatic builds and updates for your LoopFollow, please follow the instructions \
               under the following path <code>LoopFollow/fastlane/testflight.md</code>." >> $GITHUB_STEP_SUMMARY
-  
-  # Set a logic flag if this is the second instance of this day-of-week in this month
-  day_in_month:
-    runs-on: ubuntu-latest
-    name: Check day in month
-    outputs:
-      IS_SECOND_IN_MONTH: ${{ steps.date-check.outputs.is_second_instance }}
 
-    steps:
-      - id: date-check
-        name: Check if this is the second time this day-of-week happens this month
+      # Set a logic flag if this is the second instance of this day-of-week in this month
+      - name: Check if this is the second time this day-of-week happens this month
+        id: date-check
         run: |
           DAY_OF_MONTH=$(date +%-d)
           WEEK_OF_MONTH=$(( ($(date +%-d) - 1) / 7 + 1 ))
@@ -146,8 +114,8 @@ jobs:
   # Builds LoopFollow
   build:
     name: Build
-    #needs: [check_certs, check_repo, day_in_month]
-    needs: [check_repo, day_in_month]
+    #needs: [check_certs, check_status]
+    needs: [check_status]
     runs-on: macos-15
     permissions:
       contents: write
@@ -155,7 +123,7 @@ jobs:
       | # builds with manual start; if scheduled: once a month or when new commits are found
       github.event_name == 'workflow_dispatch' ||
         (vars.SCHEDULED_BUILD != 'false' && needs.day_in_month.outputs.IS_SECOND_IN_MONTH == 'true') ||
-        (vars.SCHEDULED_SYNC != 'false' && needs.check_repo.outputs.NEW_COMMITS == 'true' )
+        (vars.SCHEDULED_SYNC != 'false' && needs.check_status.outputs.NEW_COMMITS == 'true' )
     steps:
       - name: Select Xcode version
         run: "sudo xcode-select --switch /Applications/Xcode_16.4.app/Contents/Developer"
