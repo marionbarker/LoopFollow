@@ -13,16 +13,8 @@ env:
   TARGET_BRANCH: ${{ github.ref_name }} # target branch on fork to be kept in sync
 
 jobs:
-  # Checks if Distribution certificate is present and valid, optionally nukes and
-  # creates new certs if the repository variable ENABLE_NUKE_CERTS == 'true'
-#  check_certs: 
-#      name: Check certificates
-#      uses: ./.github/workflows/create_certs.yml
-#      secrets: inherit
-
   # use a single runner for these sequential steps
   check_status:
-#    needs: check_certs
     runs-on: ubuntu-latest
     name: Check Repository
     permissions:
@@ -114,7 +106,6 @@ jobs:
   # Builds LoopFollow
   build:
     name: Build
-    #needs: [check_certs, check_status]
     needs: [check_status]
     runs-on: macos-15
     permissions:
@@ -125,6 +116,13 @@ jobs:
         (vars.SCHEDULED_BUILD != 'false' && needs.day_in_month.outputs.IS_SECOND_IN_MONTH == 'true') ||
         (vars.SCHEDULED_SYNC != 'false' && needs.check_status.outputs.NEW_COMMITS == 'true' )
     steps:
+      # Checks if Distribution certificate is present and valid, optionally nukes and
+      # creates new certs if the repository variable ENABLE_NUKE_CERTS == 'true'
+      # no point in doing this step unless we plan to build
+      - name: Check certificates
+        uses: ./.github/workflows/create_certs.yml
+        secrets: inherit
+
       - name: Select Xcode version
         run: "sudo xcode-select --switch /Applications/Xcode_16.4.app/Contents/Developer"
 
