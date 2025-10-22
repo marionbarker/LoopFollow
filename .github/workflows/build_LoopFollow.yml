@@ -53,7 +53,7 @@ jobs:
       # Checks for changes in upstream repository; if changes exist prompts sync for build
       - name: Check if running on main or dev branch
         if: |
-          needs.check_repo.outputs.WORKFLOW_PERMISSION == 'true' &&
+          WORKFLOW_PERMISSION == 'true' &&
           (vars.SCHEDULED_BUILD != 'false' || vars.SCHEDULED_SYNC != 'false')
         id: check_branch
         run: |
@@ -77,7 +77,7 @@ jobs:
 
       - name: Checkout target repo
         if: |
-          needs.check_repo.outputs.WORKFLOW_PERMISSION == 'true' &&
+          WORKFLOW_PERMISSION == 'true' &&
           (vars.SCHEDULED_BUILD != 'false' || vars.SCHEDULED_SYNC != 'false')
         uses: actions/checkout@v4
         with:
@@ -85,8 +85,8 @@ jobs:
 
       - name: Sync upstream changes
         if: | # do not run the upstream sync action on the upstream repository
-          needs.check_repo.outputs.WORKFLOW_PERMISSION == 'true' &&
-          vars.SCHEDULED_SYNC != 'false' && github.repository_owner != 'loopandlearn' && steps.check_branch.outputs.ABORT_SYNC == 'false'
+          WORKFLOW_PERMISSION == 'true' &&
+          vars.SCHEDULED_SYNC != 'false' && github.repository_owner != 'loopandlearn' && ABORT_SYNC == 'false'
         id: sync
         uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
         with:
@@ -99,24 +99,24 @@ jobs:
       # Display a sample message based on the sync output var 'has_new_commits'
       - name: New commits found
         if: |
-          needs.check_repo.outputs.WORKFLOW_PERMISSION == 'true' &&
+          WORKFLOW_PERMISSION == 'true' &&
           vars.SCHEDULED_SYNC != 'false' && steps.sync.outputs.has_new_commits == 'true'
         run: echo "New commits were found to sync."
 
       - name: No new commits
         if: |
-          needs.check_repo.outputs.WORKFLOW_PERMISSION == 'true' &&
+          WORKFLOW_PERMISSION == 'true' &&
           vars.SCHEDULED_SYNC != 'false' && steps.sync.outputs.has_new_commits == 'false'
         run: echo "There were no new commits."
 
       - name: Show value of 'has_new_commits'
-        if: needs.check_repo.outputs.WORKFLOW_PERMISSION == 'true' && vars.SCHEDULED_SYNC != 'false' && steps.check_branch.outputs.ABORT_SYNC == 'false'
+        if: WORKFLOW_PERMISSION == 'true' && vars.SCHEDULED_SYNC != 'false' && ABORT_SYNC == 'false'
         run: |
           echo ${{ steps.sync.outputs.has_new_commits }}
           echo "NEW_COMMITS=${{ steps.sync.outputs.has_new_commits }}" >> $GITHUB_OUTPUT
 
       - name: Show scheduled build configuration message
-        if: needs.check_repo.outputs.WORKFLOW_PERMISSION != 'true'
+        if: WORKFLOW_PERMISSION != 'true'
         run: |
           echo "### :calendar: Scheduled Sync and Build Disabled :mobile_phone_off:" >> $GITHUB_STEP_SUMMARY
           echo "You have not yet configured the scheduled sync and build for LoopFollow's browser build." >> $GITHUB_STEP_SUMMARY
