@@ -6,7 +6,6 @@ on:
     # Check for updates every Sunday
     #   Later logic builds if there are updates or if it is the 2nd Sunday of the month
     - cron: "17 10 * * 0" # Sunday at UTC 10:17
-    - cron: "00 00 * * 4" # test time
 
 env:  
   UPSTREAM_REPO: marionbarker/LoopFollow
@@ -16,13 +15,11 @@ env:
 jobs:
   # use a single runner for these sequential steps
   check_status:
-#    needs: check_certs
     runs-on: ubuntu-latest
     name: Check Repository
     permissions:
       contents: write
     outputs:
-      WORKFLOW_PERMISSION: ${{ steps.workflow-permission.outputs.has_permission }}
       NEW_COMMITS: ${{ steps.sync.outputs.has_new_commits }}
       IS_SECOND_IN_MONTH: ${{ steps.date-check.outputs.is_second_instance }}
 
