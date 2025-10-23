@@ -34,11 +34,11 @@ jobs:
 
           if [[ $PERMISSIONS =~ "workflow" || $PERMISSIONS == "" ]]; then
             echo "GH_PAT holds workflow permissions or is fine-grained PAT."
-            echo "has_permission=true" >> $GITHUB_OUTPUT # Set WORKFLOW_PERMISSION to false.
+            echo "has_permission=true" >> $GITHUB_OUTPUT 
           else 
             echo "GH_PAT lacks workflow permissions."
             echo "Automated build features will be skipped!"
-            echo "has_permission=false" >> $GITHUB_OUTPUT # Set WORKFLOW_PERMISSION to false.
+            echo "has_permission=false" >> $GITHUB_OUTPUT 
           fi
 
       - name: Checkout target repo
@@ -96,7 +96,7 @@ jobs:
         run: |
           DAY_OF_MONTH=$(date +%-d)
           WEEK_OF_MONTH=$(( ($(date +%-d) - 1) / 7 + 1 ))
-          if [[ $WEEK_OF_MONTH -eq 4 ]]; then
+          if [[ $WEEK_OF_MONTH -eq 2 ]]; then
             echo "is_second_instance=true" >> "$GITHUB_OUTPUT"
           else
             echo "is_second_instance=false" >> "$GITHUB_OUTPUT"
@@ -119,7 +119,6 @@ jobs:
   build:
     name: Build
     needs: [check_certs, check_status]
-    #needs: [check_status]
     runs-on: macos-15
     permissions:
       contents: write
