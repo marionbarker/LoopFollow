@@ -34,11 +34,11 @@ jobs:
 
           if [[ $PERMISSIONS =~ "workflow" || $PERMISSIONS == "" ]]; then
             echo "GH_PAT holds workflow permissions or is fine-grained PAT."
-            echo "has_permission=true" >> $GITHUB_OUTPUT 
+            echo "has_permission=true" >> $GITHUB_OUTPUT
           else 
             echo "GH_PAT lacks workflow permissions."
             echo "Automated build features will be skipped!"
-            echo "has_permission=false" >> $GITHUB_OUTPUT 
+            echo "has_permission=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Checkout target repo
@@ -105,15 +105,15 @@ jobs:
   # Checks if Distribution certificate is present and valid, optionally nukes and
   # creates new certs if the repository variable ENABLE_NUKE_CERTS == 'true'
   # only run if a build is planned
-  check_certs: 
+  check_certs:
       needs: [check_status]
       name: Check certificates
       uses: ./.github/workflows/create_certs.yml
       secrets: inherit
       if: |
         github.event_name == 'workflow_dispatch' ||
-          (vars.SCHEDULED_BUILD != 'false' && needs.day_in_month.outputs.IS_SECOND_IN_MONTH == 'true') ||
-          (vars.SCHEDULED_SYNC != 'false' && needs.check_status.outputs.NEW_COMMITS == 'true' )
+          (vars.SCHEDULED_BUILD != 'false' && IS_SECOND_IN_MONTH == 'true') ||
+          (vars.SCHEDULED_SYNC != 'false' && NEW_COMMITS == 'true' )
 
   # Builds LoopFollow
   build:
@@ -125,8 +125,8 @@ jobs:
     if:
       | # builds with manual start; if scheduled: once a month or when new commits are found
       github.event_name == 'workflow_dispatch' ||
-        (vars.SCHEDULED_BUILD != 'false' && needs.day_in_month.outputs.IS_SECOND_IN_MONTH == 'true') ||
-        (vars.SCHEDULED_SYNC != 'false' && needs.check_status.outputs.NEW_COMMITS == 'true' )
+        (vars.SCHEDULED_BUILD != 'false' && IS_SECOND_IN_MONTH == 'true') ||
+        (vars.SCHEDULED_SYNC != 'false' && NEW_COMMITS == 'true' )
     steps:
       - name: Select Xcode version
         run: "sudo xcode-select --switch /Applications/Xcode_16.4.app/Contents/Developer"
